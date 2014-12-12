@@ -82,6 +82,7 @@ function emailsystem_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_managed
  */
 function emailsystem_civicrm_managed(&$entities) {
+  emailsystem_civicrm_actionschedule($entities);
   return _emailsystem_civix_civicrm_managed($entities);
 }
 
@@ -112,7 +113,7 @@ function emailsystem_civicrm_alterSettingsFolders(&$metaDataFolders = NULL) {
  *
  */
 function emailsystem_civicrm_alterScheduleReminderQuery(&$queryParams, $scheduleReminder) {
-  if (in_array($scheduleReminder->name, CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames())) {
+  if (array_key_exists($scheduleReminder->name, CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames())) {
     $queryParams['dateClause'] = str_replace('participant_register_date', 'e.register_date', $queryParams['dateClause'], $count);
     if ($count) {
       $queryParams['dateClause'] .= CRM_Emailsystem_BAO_Emailsystem::getAdditionalWhereClause($scheduleReminder->name);
@@ -127,7 +128,7 @@ function emailsystem_civicrm_alterScheduleReminderQuery(&$queryParams, $schedule
 function emailsystem_civicrm_buildForm($formName, &$form) {
   if ('CRM_Admin_Form_ScheduleReminders' == $formName && $form->getVar('_id')) {
     $values = $form->getVar('_values');
-    if (!in_array($values['name'], CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames())) {
+    if (!array_key_exists($values['name'], CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames())) {
       return NULL;
     }
     
@@ -150,19 +151,34 @@ function emailsystem_civicrm_buildForm($formName, &$form) {
  *
  */
 function emailsystem_civicrm_alterMailParams(&$params) {
-    /* switch (CRM_Utils_Array::value('groupName', $params)) { */
-    /*   case 'Scheduled Reminder Sender': */
-    /*     CRM_Emailsystem_BAO_Emailsystem::addCCToAdmin($params); */
-    /*     break; */
-        
-    /*   case 'msg_tpl_workflow_event': */
-    /*     if ($params['valueName'] == 'event_offline_receipt') { */
-    /*     } */
-    /*     break; */
-    /* } */
-    
-    if ('Scheduled Reminder Sender' == CRM_Utils_Array::value('groupName', $params)) {
-      CRM_Emailsystem_BAO_Emailsystem::addCCToAdmin($params);
-    }
-    
+  if ('Scheduled Reminder Sender' == CRM_Utils_Array::value('groupName', $params)) {
+    CRM_Emailsystem_BAO_Emailsystem::addCCToAdmin($params);
+  }
+}
+
+/**
+ * function to Manage Schedule reminder's
+ *
+ */
+function emailsystem_civicrm_actionschedule(&$entities) {
+  foreach(CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames() as $name => $value) {  
+    $entities[] = array(
+      'module' => 'biz.jmaconsulting.emailsystem',
+      'name' => $name,
+      'entity' => 'action_schedule',
+      'params' => array_merge(array(
+        'version' => 3,
+        'title' => ts($value[0]),
+        'name' => $name,
+        'entity_value' => 0,
+        'recipient' => '1',
+        'limit_to' => '1',
+        'is_repeat' => '0',
+        'is_active' => '1',
+        'record_activity' => '1',
+        'mapping_id' => '2',
+        'mode' => 'Email',
+      ), CRM_Emailsystem_BAO_Emailsystem::getReminderParameters($name))
+    );
+  }
 }

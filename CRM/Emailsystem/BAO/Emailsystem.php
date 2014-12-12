@@ -36,29 +36,90 @@
 class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
   
   /**
+   * reminderParams
+   * @var array
+   * @static
+   */
+  private static $reminderParams;
+  
+  /**
    * function to get 14 schedule reminder names
    *
    * @access public
    * return array 
    */
   static function getScheduleReminderNames() {
-    
-    return array(
-     'sfdfsdfs',
-     'b',
-     'c',
-     'd',
-     'e',
-     'f',
-     'g',
-     'h',
-     'i',
-     'j',
-     'k',
-     'l',
-     'm',
-     'n',
-    );
+    if (empty(self::$reminderParams)) {
+      $participantStatus = CRM_Event_PseudoConstant::participantStatus();
+      $statusArray = array(
+        'pending' => 'Registered',
+        'enrolled_pending' => 'enrolled_pending',
+        'enrolled_paid' => 'enrolled-paid',
+        'enrolled' => 'enrolled',
+      );
+      foreach ($statusArray as $key => $value) {
+        $$key = array_search($value, $participantStatus);
+      }
+      self::$reminderParams = array(
+        'custom_schedule_reminder_1' => array(
+          'Application Reminder', 
+          array('10', 'day', 'after', 'event_registration_start_date', $pending, 66)
+        ),
+        'custom_schedule_reminder_2' => array(
+          'Application Now Due', 
+          array('14', 'day', 'after', 'event_registration_start_date', $pending, 67)
+        ),
+        'custom_schedule_reminder_3' => array(
+          'Incomplete Application Notification', 
+          array('16', 'day', 'after', 'event_registration_start_date', $pending, 68)
+        ),
+        'custom_schedule_reminder_4' => array(
+          'Reminder ¡V Deposit Due', 
+          array('14', 'day', 'after', 'participant_register_date', $enrolled_pending, 71)
+        ),
+        'custom_schedule_reminder_5' => array(
+          'Reminder ¡V Deposit Past Due', 
+          array('21', 'day', 'after', 'participant_register_date', $enrolled_pending, 72)
+        ),
+        'custom_schedule_reminder_6' => array(
+          'Student has not paid Deposit (Admin Notification > 10 weeks)', 
+          array('28', 'day', 'after', 'participant_register_date', $enrolled_pending, 81)
+        ),
+        'custom_schedule_reminder_7' => array(
+          'Reminder ¡V Program Balance Past Due', 
+          array('7', 'day', 'after', 'participant_register_date', $enrolled_pending, 74)
+        ),
+        'custom_schedule_reminder_8' => array(
+          'Student has not paid Deposit (Admin Notification < 10 weeks)', 
+          array('14', 'day', 'after', 'participant_register_date', $enrolled_pending, 82)
+        ),
+        'custom_schedule_reminder_9' => array(
+          'Reminder ¡V Program Payment due Shortly', 
+          array('12', 'week', 'after', 'event_start_date', $enrolled_paid, 76)
+        ),
+        'custom_schedule_reminder_10' => array(
+          'Reminder ¡V Program Payment Due', 
+          array('10', 'week', 'after', 'event_start_date', $enrolled_paid, 77)
+        ),
+        'custom_schedule_reminder_11' => array(
+          'Student has not paid Deposit-Admin Notification 7 days past du', 
+          array('9', 'week', 'after', 'event_start_date', $enrolled_paid, 83)
+        ),
+        'custom_schedule_reminder_12' => array(
+          'Course Roster and Health Statements', 
+          array('2', 'week', 'after', 'event_start_date', '', 78)
+        ),
+        'custom_schedule_reminder_13' => array(
+          'AMGA Program Evaluation', 
+          array('1', 'day', 'before', 'event_end_date', $enrolled, 79)
+        ),
+        'custom_schedule_reminder_14' => array(
+          'Student Evaluation Reminder for Instructors', 
+          array('1', 'day', 'before', 'event_end_date', 1, 84)
+        ),                            
+      );
+    }
+    return self::$reminderParams;
   }
   
   /**
@@ -72,15 +133,15 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
   static function getAdditionalWhereClause($scheduleReminderName) {
     $additionalWhereClause = '';
     switch ($scheduleReminderName) {
-      case 'a':
-      case 'b':
-      case 'c':
+      case 'custom_schedule_reminder_4':
+      case 'custom_schedule_reminder_5':
+      case 'custom_schedule_reminder_6':
         // greater than 10 week
         $additionalWhereClause = ' r.start_date';
         break;
         
-      case 'd':
-      case 'e':
+      case 'custom_schedule_reminder_7':
+      case 'custom_schedule_reminder_8':
         // less than 10 week
         $additionalWhereClause = ' r.start_date ';
         break;
@@ -102,25 +163,25 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
     $scheduleReminderName = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_ActionSchedule', $params['entity_id']);
     switch ($scheduleReminderName) {
       // add cc to email
-      case 'a':
-      case 'b':
-      case 'c':
-      case 'd':
-      case 'e':
+      case 'custom_schedule_reminder_2':
+      case 'custom_schedule_reminder_3':
+      case 'custom_schedule_reminder_5':
+      case 'custom_schedule_reminder_7':
+      case 'custom_schedule_reminder_10':
         $params['cc'] = self::getAdminEmails();
         break;
         
       // replace toEmail with admin
-      case 'f':
-      case 'g':
-      case 'h':
+      case 'custom_schedule_reminder_6':
+      case 'custom_schedule_reminder_8':
+      case 'custom_schedule_reminder_11':
         $params['toName'] = '';
         $params['toEmail'] = self::getAdminEmails();
         break;
 
       // replace toEmail with instructor
-      case 'i':
-      case 'j':
+      case 'custom_schedule_reminder_12':
+      case 'custom_schedule_reminder_14':
         $params['toName'] = '';
         $params['toEmail'] = self::getAdminEmails('instructor');
         break;
@@ -147,5 +208,40 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
     }
     
     return $email;
+  }
+  
+  /**
+   * This hook to alter query of schedule reminder to fetch recipients
+   *
+   * @param string $queryParams the params
+   * @param object $scheduleReminder CRM_Core_BAO_ActionSchedule
+   *
+   * @access public
+   */
+  static function getReminderParameters($scheduleReminderName) {
+    $params = array();
+    
+    $params = array(
+      'start_action_offset',
+      'start_action_unit',
+      'start_action_condition',
+      'start_action_date',
+      'entity_status', 
+      'msg_template_id' 
+    );
+    $scheduleReminders = CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames();
+    $params = array_combine($params, $scheduleReminders[$scheduleReminderName][1]);
+    if (!empty($params['msg_template_id'])) {
+      $messageTemplates = new CRM_Core_DAO_MessageTemplate();
+      $messageTemplates->id = $params['msg_template_id'];
+      if ($messageTemplates->find(TRUE)) {
+        $params += array(
+          'body_html' => $messageTemplates->msg_html,
+          'body_text' => $messageTemplates->msg_text,
+          'subject' => $messageTemplates->msg_subject,
+        );
+      }
+    }
+    return $params;
   }
 }
