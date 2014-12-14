@@ -244,7 +244,11 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
   }
   
   /**
-   * This 
+   * This function formarts the date for token value
+   * July 17 2014 - July 20 2014  --  July 17-20, 2014
+   * July 28 2014 - August 2 2014 --  July 28 - August 2, 2014
+   * December 30 2014 - January 3 2015 --  December 30, 2014 - January 3, 2015
+   *
    *
    * @param string  the 
    * @param object  
