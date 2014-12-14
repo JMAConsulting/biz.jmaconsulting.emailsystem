@@ -157,6 +157,32 @@ function emailsystem_civicrm_alterMailParams(&$params) {
 }
 
 /**
+ * Implementation of hook_civicrm_tokenValues
+ *
+ */
+function emailsystem_civicrm_tokenValues(&$values, $cids) {
+  
+  if (array_key_exists('event.event_id', $values)) {
+    $values['event.start_end_date'] = CRM_Emailsystem_BAO_Emailsystem::getDateFormatted(
+      $values['event.event_id'], 
+      $values['event.start_date'], 
+      $values['event.end_date']
+    );
+    CRM_Core_Smarty::singleton()->assign('eventStartDate', $values['event.start_date']);
+  }
+}
+
+/**
+ * Implementation of hook_civicrm_tokens
+ *
+ */
+function emailsystem_civicrm_tokens(&$tokens) {
+  $tokens['event'] = array(
+    'event.start_end_date' => 'Event Start-End Date',
+  );
+}
+
+/**
  * function to Manage Schedule reminder's
  *
  */

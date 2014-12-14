@@ -43,6 +43,13 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
   private static $reminderParams;
   
   /**
+   * holds event start date and end date
+   * @var array
+   * @static
+   */
+  private static $eventStartEndDate;
+  
+  /**
    * function to get 14 schedule reminder names
    *
    * @access public
@@ -168,7 +175,7 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
       case 'custom_schedule_reminder_5':
       case 'custom_schedule_reminder_7':
       case 'custom_schedule_reminder_10':
-        $params['cc'] = self::getAdminEmails();
+        $params['cc'] = self::getAdminEmails($params['entity_id']);
         break;
         
       // replace toEmail with admin
@@ -176,14 +183,13 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
       case 'custom_schedule_reminder_8':
       case 'custom_schedule_reminder_11':
         $params['toName'] = '';
-        $params['toEmail'] = self::getAdminEmails();
+        $params['toEmail'] = self::getAdminEmails($params['entity_id']);
         break;
 
       // replace toEmail with instructor
       case 'custom_schedule_reminder_12':
       case 'custom_schedule_reminder_14':
-        $params['toName'] = '';
-        $params['toEmail'] = self::getAdminEmails('instructor');
+        // TODO: add code to attach CSV of participant and 
         break;
     }
   }
@@ -191,30 +197,22 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
   /**
    * function to get admin or instructor emails
    *
-   * @param string $context
+   * @param string 
    *
    * @access public 
    * @return string 
    */
-  static function getAdminEmails($context = 'admin') {
+  static function getAdminEmails($reminderId) {
     $email = '';
-    if ($context == 'admin') {
-      // get all admin emails
-      $email = 'pradeep.nayak@jmaconsulting.biz, pradpnayak@gmail.com';
-    }
-    else {
-      // get all instructor emails
-      $email = '';
-    }
-    
+    // get all admin emails
+    $email = 'pradeep.nayak@jmaconsulting.biz';    
     return $email;
   }
   
   /**
-   * This hook to alter query of schedule reminder to fetch recipients
+   * This function builds the schedule reminder paramters for install
    *
-   * @param string $queryParams the params
-   * @param object $scheduleReminder CRM_Core_BAO_ActionSchedule
+   * @param string $scheduleReminderName
    *
    * @access public
    */
@@ -243,5 +241,38 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
       }
     }
     return $params;
+  }
+  
+  /**
+   * This 
+   *
+   * @param string  the 
+   * @param object  
+   * @param object  
+   *
+   * @access public
+   */
+  static function getDateFormatted($eventId, $startDate, $endDate) {
+
+    if (empty(self::$eventStartEndDate[$eventId])) {
+      $start_date_modified = date('F d Y', strtotime($startDate));
+      $end_date_modified = date('F d Y', strtotime($endDate));
+      $start_date_array = explode(' ', $start_date_modified);
+      $end_date_array = explode(' ', $end_date_modified);
+
+      if($start_date_array[0].$start_date_array[2] === $end_date_array[0].$end_date_array[2]) {
+        $toShowDate = "$start_date_array[0] $start_date_array[1]-$end_date_array[1], $start_date_array[2]";
+      }
+      elseif ($start_date_array[2] === $end_date_array[2]) {
+        $toShowDate = "$start_date_array[0] $start_date_array[1] - $end_date_array[0] $end_date_array[1], $start_date_array[2]";
+      }
+      else {
+        $toShowDate = "$start_date_array[0] $start_date_array[1],  $start_date_array[2] - $end_date_array[0] $end_date_array[1], $end_date_array[2]";
+      }
+      self::$eventStartEndDate[$eventId] = $toShowDate;
+      CRM_Core_Error::debug_var( '$eventStartEndDate', $eventId );
+    }
+    
+    return self::$eventStartEndDate[$eventId];
   }
 }

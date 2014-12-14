@@ -1220,8 +1220,6 @@ INSERT INTO civicrm_action_log (contact_id, entity_id, entity_table, action_sche
 LEFT JOIN {$reminderJoinClause}
 {$whereClause} {$limitWhereClause} AND {$dateClause} {$notINClause}
 ";
-      CRM_Core_Error::debug( '$query', $query );
-      exit;
 
       CRM_Core_DAO::executeQuery($query, array(1 => array($actionSchedule->id, 'Integer')));
 
