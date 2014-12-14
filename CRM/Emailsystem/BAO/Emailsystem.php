@@ -274,7 +274,6 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
         $toShowDate = "$start_date_array[0] $start_date_array[1],  $start_date_array[2] - $end_date_array[0] $end_date_array[1], $end_date_array[2]";
       }
       self::$eventStartEndDate[$eventId] = $toShowDate;
-      CRM_Core_Error::debug_var( '$eventStartEndDate', $eventId );
     }
     
     return self::$eventStartEndDate[$eventId];
