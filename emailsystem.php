@@ -1,6 +1,7 @@
 <?php
 
 require_once 'emailsystem.civix.php';
+require_once 'civicrm_constants.php';
 
 /**
  * Implementation of hook_civicrm_config
@@ -207,4 +208,29 @@ function emailsystem_civicrm_actionschedule(&$entities) {
       ), CRM_Emailsystem_BAO_Emailsystem::getReminderParameters($name))
     );
   }
+}
+
+/**
+ * Implementation of hook_civicrm_post
+ *
+ */
+function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  if ($objectName == 'GroupContact' && $op == 'create' && $objectId == IFMGA_GROUP_ID) {
+    foreach ($objectRef as $contactID) {
+      $sendParams = array(
+        'messageTemplateID' => IFMGA_MESSAGE_TEMPLATE, 
+        'contactId' => $contactID,
+        'toEmail' => CRM_Contact_BAO_Contact::getPrimaryEmail($contactID),
+        'tplParams' => array(),
+      );
+      CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams, TRUE);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_civicrm_pre
+ *
+ */
+function emailsystem_civicrm_pre($op, $objectName, $id, &$params) {
 }

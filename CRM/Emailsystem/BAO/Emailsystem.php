@@ -279,4 +279,27 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
     
     return self::$eventStartEndDate[$eventId];
   }
+  
+  /**
+   * This function sends mail when there is change in db values for entity 
+   * Participant, Contribution and GroupContact
+   *
+   * @param array $sendParams
+   * @param string $cc
+   *
+   * @access public
+   */
+  static function sendMail($sendParams, $cc = FALSE) {
+    if (empty($sendParams['messageTemplateID'])) {
+      return FALSE;
+    }
+    if ($cc) {
+      $sendParams['cc'] = self::getAdminEmails(TRUE);
+    } 
+    
+    $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
+    $sendParams['from'] = "$domainValues[0] <$domainValues[1]>";
+    CRM_Core_BAO_MessageTemplate::sendTemplate($sendParams);
+  }
+  
 }
