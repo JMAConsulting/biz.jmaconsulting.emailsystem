@@ -299,4 +299,54 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
     CRM_Core_BAO_MessageTemplate::sendTemplate($sendParams);
   }
   
+  /**
+   * This function gets the participant tokens
+   *
+   * @param integer $participantId Participant Id
+   *
+   * @access public
+   * @returns array of values
+   */
+  static function getParticipantTokens($participantId) {
+    $eventId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $participantId, 'event_id');
+    
+    $sql = "SELECT
+  civicrm_event.title as title,
+  civicrm_event.start_date,
+  civicrm_event.end_date,
+  civicrm_address.street_address as street_address,
+  civicrm_address.city as city,
+  civicrm_address.postal_code as postal_code,
+  civicrm_state_province.abbreviation as state
+FROM civicrm_event
+LEFT JOIN civicrm_loc_block ON civicrm_event.loc_block_id = civicrm_loc_block.id
+LEFT JOIN civicrm_address ON civicrm_loc_block.address_id = civicrm_address.id
+LEFT JOIN civicrm_state_province ON civicrm_address.state_province_id = civicrm_state_province.id
+WHERE civicrm_event.id = %1";
+    $queryParams = array(1 => array($eventId, 'Integer'));
+    $results = array();
+    $dao = CRM_Core_DAO::executeQuery($sql, $queryParams);
+    if ($dao->fetch()) {
+      $loc['street_address'] = $dao->street_address;
+      $loc['city'] = $dao->city;
+      $loc['state_province'] = $dao->state;
+      $loc['postal_code'] = $dao->postal_code;
+      $results = array(
+        'event_id' => $eventId,
+        'start_date' => $dao->start_date,
+        'end_date' => $dao->end_date,
+        'title' => $dao->title,
+        'event_location' => CRM_Utils_Address::format($loc),
+      );
+    }
+    
+    // get customfields for Participant
+    $params = array(
+      'entity_id' => $participantId,
+      'entity_table' => 'Participant',
+     );
+     $result = civicrm_api3('custom_value', 'get', $params);
+     $results['custom_' . ENROLLMENT_DATE_FIELD_ID] = CRM_Utils_Array::value('latest', CRM_Utils_Array::value(ENROLLMENT_DATE_FIELD_ID, $result['values']));
+     return  $results;
+  }
 }

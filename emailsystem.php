@@ -171,6 +171,36 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     );
     CRM_Core_Smarty::singleton()->assign('eventStartDate', $values['event.start_date']);
   }
+  $participantId = CRM_Core_Smarty::singleton()->get_template_vars('participantIdToken');
+  if ($participantId) {
+    
+    $results = CRM_Emailsystem_BAO_Emailsystem::getParticipantTokens($participantId);
+    
+    $values['event.start_end_date'] = CRM_Emailsystem_BAO_Emailsystem::getDateFormatted(
+      $results['event_id'], 
+      $results['start_date'], 
+      $results['end_date']
+    );
+    
+    $values['custom.participant_id'] = $participantId;
+    $values['custom.title'] = $results['title'];
+    $values['custom.event_location'] = $results['event_location'];
+    $values['custom.enrollment_date'] = CRM_Utils_Date::customFormat($results['custom_' . ENROLLMENT_DATE_FIELD_ID], '%B %E, %Y');
+    $values['custom.enrollment_date_2_weeks'] = CRM_Utils_Date::customFormat(date('Y-m-d',strtotime("+2 weeks", strtotime($results['custom_' . ENROLLMENT_DATE_FIELD_ID]))), '%B %E, %Y');
+    
+    $date = date('F', $results['custom_' . ENROLLMENT_DATE_FIELD_ID]);
+    if (in_array($date, array('December', 'January', 'February'))) {
+      $dateRange = 'October 15';
+    }
+    elseif (in_array($date, array('March', 'April', 'May'))){
+      $dateRange = 'November 15';
+    }
+    else {
+      $dateRange = 'January 15';      
+    }
+    $values['custom.enrollment_status_date_range'] = $dateRange;
+    CRM_Core_Smarty::singleton()->assign('participantIdToken', '');
+  }
 }
 
 /**
@@ -180,6 +210,14 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
 function emailsystem_civicrm_tokens(&$tokens) {
   $tokens['event'] = array(
     'event.start_end_date' => ts('Event Start-End Date'),
+  );
+  $tokens['custom'] = array(
+    'custom.title' => ts('Event Title'),
+    'custom.participant_id' => ts('Participant Id'),
+    'custom.event_location' => ts('Event Location'),
+    'custom.enrollment_date_2_weeks' => ts('2 weeks From Enrollment Date'),
+    'custom.enrollment_date' => ts('Enrollment Date'),
+    'custom.enrollment_status_date_range' => ts('Enrollment Status Date range'),
   );
 }
 
@@ -235,12 +273,12 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   
   if ($objectName == 'Participant' && $op == 'edit') {
     if (in_array($objectRef->status_id, array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT))) {
-    
       if (!CRM_Core_Smarty::singleton()->get_template_vars('statusChange')) {
         return FALSE;
       }
       
       $messageTemplateId = NULL;
+      CRM_Core_Smarty::singleton()->assign('participantIdToken', $objectId);
       if ($objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT) {
         $eventId = $objectRef->event_id;
         if (!$eventId) {
@@ -285,7 +323,6 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams);
       }
       CRM_Core_Smarty::singleton()->assign('statusChange', FALSE);
-      CRM_Core_Smarty::singleton()->assign('participantObject', $objectRef);
     }
   }
 }
