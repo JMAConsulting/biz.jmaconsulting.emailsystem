@@ -179,7 +179,7 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
  */
 function emailsystem_civicrm_tokens(&$tokens) {
   $tokens['event'] = array(
-    'event.start_end_date' => 'Event Start-End Date',
+    'event.start_end_date' => ts('Event Start-End Date'),
   );
 }
 
