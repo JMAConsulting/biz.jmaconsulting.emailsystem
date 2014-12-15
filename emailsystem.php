@@ -231,6 +231,62 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       );
       CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams, TRUE);
     }
+  } 
+  
+  if ($objectName == 'Participant' && $op == 'edit') {
+    if (in_array($objectRef->status_id, array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT))) {
+    
+      if (!CRM_Core_Smarty::singleton()->get_template_vars('statusChange')) {
+        return FALSE;
+      }
+      
+      $messageTemplateId = NULL;
+      if ($objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT) {
+        $eventId = $objectRef->event_id;
+        if (!$eventId) {
+          $eventId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $objectId, 'event_id');
+        }
+        $eventStartDate = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Event', $eventId, 'start_date');
+        $eventStartDate = strtotime($eventStartDate);
+        $tenWeeks = strtotime('+10 weeks');
+        if ($tenWeeks < $eventStartDate) {
+          $messageTemplateId = EPP_GREATER_MSG_TPL;
+        }
+        elseif ($tenWeeks > $eventStartDate) {
+          $messageTemplateId = EPP_LESS_MSG_TPL;        
+        }
+        else {
+          return FALSE;
+        }
+      }
+      else {
+        $messageTemplateId = UNDER_REVIEW_MSG_TPL;
+      }
+    
+      $contactID = $objectRef->contact_id;
+      if (!$contactID) {
+        $contactID = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $objectId, 'contact_id');
+      }
+      $sendParams = array(
+        'messageTemplateID' => $messageTemplateId, 
+        'contactId' => $contactID,
+        'toEmail' => CRM_Contact_BAO_Contact::getPrimaryEmail($contactID),
+        'tplParams' => array(),
+      );
+      CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams, TRUE);
+    
+      if ($objectRef->status_id == PARTICIPANT_STATUS_UNDER_REVIEW) {
+        $sendParams = array(
+          'messageTemplateID' => UNDER_REVIEW_MSG_TPL_ADMIN, 
+          'contactId' => $contactID,
+          'toEmail' => CRM_Emailsystem_BAO_Emailsystem::getAdminEmails(1),
+          'tplParams' => array(),
+        );
+        CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams);
+      }
+      CRM_Core_Smarty::singleton()->assign('statusChange', FALSE);
+      CRM_Core_Smarty::singleton()->assign('participantObject', $objectRef);
+    }
   }
 }
 
@@ -239,4 +295,11 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  *
  */
 function emailsystem_civicrm_pre($op, $objectName, $id, &$params) {
+  if ($objectName == 'Participant' && $op == 'edit' && 
+      in_array(CRM_Utils_Array::value('status_id', $params), array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT))) {
+    $originalStatusId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $id, 'status_id');
+    if ($originalStatusId != $params['status_id']) {
+      CRM_Core_Smarty::singleton()->assign('statusChange', TRUE);
+    }
+  }
 }
