@@ -29,6 +29,7 @@ function emailsystem_civicrm_xmlMenu(&$files) {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_install
  */
 function emailsystem_civicrm_install() {
+  CRM_Core_DAO::executeQuery("ALTER TABLE `civicrm_action_schedule` CHANGE `entity_value` `entity_value` VARCHAR( 255 ) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL COMMENT 'Entity value'");
   return _emailsystem_civix_civicrm_install();
 }
 
