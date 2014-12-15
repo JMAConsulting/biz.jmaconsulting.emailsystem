@@ -142,13 +142,13 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
       case 'custom_schedule_reminder_5':
       case 'custom_schedule_reminder_6':
         // greater than 10 week
-        $additionalWhereClause = ' r.start_date';
+        $additionalWhereClause = ' r.start_date > ' . strtotime('+10 weeks');
         break;
         
       case 'custom_schedule_reminder_7':
       case 'custom_schedule_reminder_8':
         // less than 10 week
-        $additionalWhereClause = ' r.start_date ';
+        $additionalWhereClause = ' r.start_date < ' . strtotime('+10 weeks');
         break;
     }
     
