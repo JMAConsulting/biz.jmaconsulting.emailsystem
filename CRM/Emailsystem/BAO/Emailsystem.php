@@ -60,8 +60,6 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
       $participantStatus = CRM_Event_PseudoConstant::participantStatus();
       $statusArray = array(
         'pending' => 'Registered',
-        'enrolled_pending' => 'enrolled_pending',
-        'enrolled_paid' => 'enrolled-paid',
         'enrolled' => 'enrolled',
       );
       foreach ($statusArray as $key => $value) {
@@ -81,36 +79,36 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
           array('16', 'day', 'after', 'event_registration_start_date', $pending, 68)
         ),
         'custom_schedule_reminder_4' => array(
-          'Reminder ¡V Deposit Due', 
-          array('14', 'day', 'after', 'participant_register_date', $enrolled_pending, 71)
+          'Reminder - Deposit Due', 
+          array('14', 'day', 'after', 'participant_register_date', $enrolled, 71)
         ),
         'custom_schedule_reminder_5' => array(
-          'Reminder ¡V Deposit Past Due', 
-          array('21', 'day', 'after', 'participant_register_date', $enrolled_pending, 72)
+          'Reminder - Deposit Past Due', 
+          array('21', 'day', 'after', 'participant_register_date', $enrolled, 72)
         ),
         'custom_schedule_reminder_6' => array(
           'Student has not paid Deposit (Admin Notification > 10 weeks)', 
-          array('28', 'day', 'after', 'participant_register_date', $enrolled_pending, 81)
+          array('28', 'day', 'after', 'participant_register_date', $enrolled, 81)
         ),
         'custom_schedule_reminder_7' => array(
-          'Reminder ¡V Program Balance Past Due', 
-          array('7', 'day', 'after', 'participant_register_date', $enrolled_pending, 74)
+          'Reminder - Program Balance Past Due', 
+          array('7', 'day', 'after', 'participant_register_date', $enrolled, 74)
         ),
         'custom_schedule_reminder_8' => array(
           'Student has not paid Deposit (Admin Notification < 10 weeks)', 
-          array('14', 'day', 'after', 'participant_register_date', $enrolled_pending, 82)
+          array('14', 'day', 'after', 'participant_register_date', $enrolled, 82)
         ),
         'custom_schedule_reminder_9' => array(
-          'Reminder ¡V Program Payment due Shortly', 
-          array('12', 'week', 'after', 'event_start_date', $enrolled_paid, 76)
+          'Reminder - Program Payment due Shortly', 
+          array('12', 'week', 'after', 'event_start_date', $enrolled, 76)
         ),
         'custom_schedule_reminder_10' => array(
-          'Reminder ¡V Program Payment Due', 
-          array('10', 'week', 'after', 'event_start_date', $enrolled_paid, 77)
+          'Reminder - Program Payment Due', 
+          array('10', 'week', 'after', 'event_start_date', $enrolled, 77)
         ),
         'custom_schedule_reminder_11' => array(
           'Student has not paid Deposit-Admin Notification 7 days past du', 
-          array('9', 'week', 'after', 'event_start_date', $enrolled_paid, 83)
+          array('9', 'week', 'after', 'event_start_date', $enrolled, 83)
         ),
         'custom_schedule_reminder_12' => array(
           'Course Roster and Health Statements', 

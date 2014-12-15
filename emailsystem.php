@@ -187,8 +187,13 @@ function emailsystem_civicrm_tokens(&$tokens) {
  * function to Manage Schedule reminder's
  *
  */
-function emailsystem_civicrm_actionschedule(&$entities) {
-  foreach(CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames() as $name => $value) {  
+function emailsystem_civicrm_actionschedule(&$entities) { 
+  $eventTypes = CRM_Core_PseudoConstant::get('CRM_Event_DAO_Event', 'event_type_id', array('labelColumn' => 'value'));
+  $eventTypes = implode('', $eventTypes);
+
+  $participantRole = CRM_Core_PseudoConstant::get('CRM_Event_DAO_Participant', 'role_id', array('labelColumn' => 'name'));
+  $participantRole = array_search('Instructor', $participantRole);
+  foreach(CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames() as $name => $value) { 
     $entities[] = array(
       'module' => 'biz.jmaconsulting.emailsystem',
       'name' => $name,
@@ -197,9 +202,10 @@ function emailsystem_civicrm_actionschedule(&$entities) {
         'version' => 3,
         'title' => ts($value[0]),
         'name' => $name,
-        'entity_value' => 0,
+        'entity_value' => $eventTypes,
         'recipient' => '1',
         'limit_to' => '1',
+        'recipient_listing' => (in_array($name, array('custom_schedule_reminder_12', 'custom_schedule_reminder_14'))) ? $participantRole : NULL,
         'is_repeat' => '0',
         'is_active' => '1',
         'record_activity' => '1',
