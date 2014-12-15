@@ -200,6 +200,7 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
       $dateRange = 'January 15';      
     }
     $values['custom.enrollment_status_date_range'] = $dateRange;
+    CRM_Core_Smarty::singleton()->assign('eventStartDate', $results['start_date']);
     CRM_Core_Smarty::singleton()->assign('participantIdToken', '');
   }
 }
