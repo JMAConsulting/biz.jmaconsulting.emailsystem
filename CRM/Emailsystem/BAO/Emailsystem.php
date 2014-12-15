@@ -200,10 +200,17 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
    * @access public 
    * @return string 
    */
-  static function getAdminEmails($reminderId) {
+  static function getAdminEmails($reminderId = NULL) {
     $email = '';
-    // get all admin emails
-    $email = 'pradeep.nayak@jmaconsulting.biz';    
+    // get admin email id
+    if ($reminderId) {
+      $email = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_ActionSchedule', $reminderId, 'from_email');
+    }
+    
+    if (empty($email)) {
+      $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
+      $email = "$domainValues[0] <$domainValues[1]>";
+    }
     return $email;
   }
   
@@ -291,7 +298,7 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
       return FALSE;
     }
     if ($cc) {
-      $sendParams['cc'] = self::getAdminEmails(TRUE);
+      $sendParams['cc'] = self::getAdminEmails();
     } 
     
     $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
