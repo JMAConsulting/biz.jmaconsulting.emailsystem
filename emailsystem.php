@@ -189,7 +189,7 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     $values['custom.enrollment_date'] = CRM_Utils_Date::customFormat($results['custom_' . ENROLLMENT_DATE_FIELD_ID], '%B %E, %Y');
     $values['custom.enrollment_date_2_weeks'] = CRM_Utils_Date::customFormat(date('Y-m-d',strtotime("+2 weeks", strtotime($results['custom_' . ENROLLMENT_DATE_FIELD_ID]))), '%B %E, %Y');
     
-    $date = date('F', $results['custom_' . ENROLLMENT_DATE_FIELD_ID]);
+    $date = date('F', $results['start_date']);
     if (in_array($date, array('December', 'January', 'February'))) {
       $dateRange = 'October 15';
     }
@@ -199,7 +199,7 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     else {
       $dateRange = 'January 15';      
     }
-    $values['custom.enrollment_status_date_range'] = $dateRange;
+    $values['custom.enrollment_deadline'] = $dateRange;
     CRM_Core_Smarty::singleton()->assign('eventStartDate', $results['start_date']);
     CRM_Core_Smarty::singleton()->assign('participantIdToken', '');
   }
@@ -219,7 +219,7 @@ function emailsystem_civicrm_tokens(&$tokens) {
     'custom.event_location' => ts('Event Location'),
     'custom.enrollment_date_2_weeks' => ts('2 weeks From Enrollment Date'),
     'custom.enrollment_date' => ts('Enrollment Date'),
-    'custom.enrollment_status_date_range' => ts('Enrollment Status Date range'),
+    'custom.enrollment_deadline' => ts('Enrollment Deadline'),
   );
 }
 
