@@ -326,7 +326,12 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
       } 
       if ($objectRef->status_id == PARTICIPANT_STATUS_PASS) {
         // Get all events contact is a participant of
-        $parts = civicrm_api3('Participant', 'get', array('contact_id' => $contactID));
+        $partParams = array(
+          'contact_id' => $contactID,
+          'event_type' => array('IN' => array('Rock Guide Exam', 'Alpine Guide Exam', 'Ski Guide Exam')),
+          'participant_status_id' => PARTICIPANT_STATUS_PASS,
+        );
+        $parts = civicrm_api3('Participant', 'get', $partParams);
         $sendFlag = 0;
         foreach ($parts['values'] as $key => $value) {
           if (in_array($value['event_type'], array('Rock Guide Exam', 'Alpine Guide Exam', 'Ski Guide Exam'))) {
