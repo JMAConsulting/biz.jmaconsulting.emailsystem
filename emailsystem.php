@@ -274,7 +274,7 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   } 
   
   if ($objectName == 'Participant' && $op == 'edit') {
-    if (in_array($objectRef->status_id, array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT))) {
+    if (in_array($objectRef->status_id, array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT, PARTICIPANT_STATUS_PASS))) {
       if (!CRM_Core_Smarty::singleton()->get_template_vars('statusChange')) {
         return FALSE;
       }
@@ -323,6 +323,27 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
           'tplParams' => array(),
         );
         CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams);
+      } 
+      if ($objectRef->status_id == PARTICIPANT_STATUS_PASS) {
+        // Get all events contact is a participant of
+        $parts = civicrm_api3('Participant', 'get', array('contact_id' => $contactID));
+        $sendFlag = 0;
+        foreach ($parts['values'] as $key => $value) {
+          if (in_array($value['event_type'], array('Rock Guide Exam', 'Alpine Guide Exam', 'Ski Guide Exam'))) {
+            if ($value['participant_status_id'] == PARTICIPANT_STATUS_PASS) {
+              $sendFlag++;
+            }
+          }
+        }
+        if ($sendFlag >= 3) { // Should have a pass status in atleast 3 events of the above types
+          $sendParams = array(
+            'messageTemplateID' => IFMGA_MESSAGE_TEMPLATE, // Change this to the corresponding message template later
+            'contactId' => $contactID,
+            'toEmail' => CRM_Emailsystem_BAO_Emailsystem::getAdminEmails(),
+            'tplParams' => array(),
+          );
+          CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams);
+        }
       }
       CRM_Core_Smarty::singleton()->assign('statusChange', FALSE);
     }
@@ -335,7 +356,7 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  */
 function emailsystem_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Participant' && $op == 'edit' && 
-      in_array(CRM_Utils_Array::value('status_id', $params), array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT))) {
+      in_array(CRM_Utils_Array::value('status_id', $params), array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT, PARTICIPANT_STATUS_PASS))) {
     $originalStatusId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $id, 'status_id');
     if ($originalStatusId != $params['status_id']) {
       CRM_Core_Smarty::singleton()->assign('statusChange', TRUE);
