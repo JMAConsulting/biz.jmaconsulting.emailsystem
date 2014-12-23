@@ -202,6 +202,7 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     $values['custom.enrollment_deadline'] = $dateRange;
     CRM_Core_Smarty::singleton()->assign('eventStartDate', $results['start_date']);
     CRM_Core_Smarty::singleton()->assign('participantIdToken', '');
+    CRM_Core_Smarty::singleton()->assign('enrollmentDate', $results['custom_' . ENROLLMENT_DATE_FIELD_ID]);    
   }
 }
 
