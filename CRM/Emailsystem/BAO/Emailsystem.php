@@ -209,7 +209,7 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
     
     if (empty($email)) {
       $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
-      $email = "$domainValues[0] <$domainValues[1]>";
+      $email = $domainValues[1];
     }
     return $email;
   }
