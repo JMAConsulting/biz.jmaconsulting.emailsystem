@@ -291,7 +291,12 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   } 
   
   if ($objectName == 'Participant' && $op == 'edit') {
-    if (in_array($objectRef->status_id, array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT, PARTICIPANT_STATUS_PASS))) {
+    if (in_array($objectRef->status_id, array(
+      PARTICIPANT_STATUS_UNDER_REVIEW,
+      PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
+      PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
+      PARTICIPANT_STATUS_PASS)
+    )) {
       if (!CRM_Core_Smarty::singleton()->get_template_vars('statusChange')) {
         return FALSE;
       }
@@ -329,7 +334,7 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         return TRUE;
       }
       
-      if ($objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT) {
+      if (in_array($objectRef->status_id, array(PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2))) {
         $eventId = $objectRef->event_id;
         if (!$eventId) {
           $eventId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $objectId, 'event_id');
@@ -379,7 +384,12 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
  */
 function emailsystem_civicrm_pre($op, $objectName, $id, &$params) {
   if ($objectName == 'Participant' && $op == 'edit' && 
-      in_array(CRM_Utils_Array::value('status_id', $params), array(PARTICIPANT_STATUS_UNDER_REVIEW, PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT, PARTICIPANT_STATUS_PASS))) {
+      in_array(CRM_Utils_Array::value('status_id', $params), array(
+        PARTICIPANT_STATUS_UNDER_REVIEW,
+        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
+        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
+        PARTICIPANT_STATUS_PASS)
+      )) {
     $originalStatusId = CRM_Core_DAO::getFieldValue('CRM_Event_DAO_Participant', $id, 'status_id');
     if ($originalStatusId != $params['status_id']) {
       CRM_Core_Smarty::singleton()->assign('statusChange', TRUE);
