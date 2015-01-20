@@ -172,12 +172,14 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     CRM_Core_Smarty::singleton()->assign('eventStartDate', $values['event.start_date']);
   }
 
+  $contactId = CRM_Utils_Array::value('contact_id', $cids);
+  if (!$contactId) {
+    $contactId = reset($cids);
+  }
+
   $participantId = CRM_Core_Smarty::singleton()->get_template_vars('participantIdToken');
   if ($participantId) {
-    $contactId = CRM_Utils_Array::value('contact_id', $cids);
-    if (!$contactId) {
-      $contactId = reset($cids);
-    }
+
     $results = CRM_Emailsystem_BAO_Emailsystem::getParticipantTokens($participantId);
     
     $value['event.start_end_date'] = CRM_Emailsystem_BAO_Emailsystem::getDateFormatted(
@@ -212,7 +214,8 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
 
   $membershipId = CRM_Core_Smarty::singleton()->get_template_vars('membershipIdToken');
   if($membershipId){
-    $value['custom.membership_end_date'] = civicrm_api3('Membership', 'getvalue', array('id' => $membershipId, 'return' => 'end_date'));
+    $membership_end = civicrm_api3('Membership', 'getvalue', array('id' => $membershipId, 'return' => 'end_date'));
+    $values[$contactId]['custom.membership_end_date'] = date('F j, Y', strtotime($membership_end));
   }
 }
 
