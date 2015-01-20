@@ -254,6 +254,7 @@ function emailsystem_civicrm_actionschedule(&$entities) {
       'module' => 'biz.jmaconsulting.emailsystem',
       'name' => $name,
       'entity' => 'action_schedule',
+      'update' => 'never',
       'params' => array_merge(array(
         'version' => 3,
         'title' => ts($value[0]),
