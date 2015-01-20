@@ -297,12 +297,41 @@ class CRM_Emailsystem_BAO_Emailsystem extends CRM_Core_DAO {
     if (empty($sendParams['messageTemplateID'])) {
       return FALSE;
     }
+
+    $messageID = $sendParams['messageTemplateID'];
+
+    $adminEmails = array(
+      'registration' => array(
+        'email' => 'jane@amga.com',
+        'name' => 'Jane Andersion'
+      ),
+      'membership' => array(
+        'email' => 'info@amga.com',
+        'name' => 'Valerie Bender'
+      )
+    );
+
+    $adminMap = array(
+      65 => 'registration',
+      69 => 'registration',
+      70 => 'registration',
+      73 => 'registration',
+      80 => 'registration',
+    );
+
+    $override = array_key_exists($messageID, $adminMap);
+
     if ($cc) {
-      $sendParams['cc'] = self::getAdminEmails();
+      $sendParams['cc'] = $override ? $adminEmails[$adminMap[$messageID]]['email'] : self::getAdminEmails();
     } 
-    
-    $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
-    $sendParams['from'] = "$domainValues[0] <$domainValues[1]>";
+
+    if ($override) {
+      $sendParams['from'] = "{$adminEmails[$adminMap[$messageID]]['name']} <{$adminEmails[$adminMap[$messageID]]['email']}>";
+    }else{
+      $domainValues = CRM_Core_BAO_Domain::getNameAndEmail();
+      $sendParams['from'] = "$domainValues[0] <$domainValues[1]>";
+    }
+
     CRM_Core_BAO_MessageTemplate::sendTemplate($sendParams);
   }
   

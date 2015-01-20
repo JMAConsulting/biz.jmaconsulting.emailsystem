@@ -363,7 +363,7 @@ function emailsystem_civicrm_post($op, $objectName, $objectId, &$objectRef) {
         $sendParams = array(
           'messageTemplateID' => UNDER_REVIEW_MSG_TPL_ADMIN, 
           'contactId' => $contactID,
-          'toEmail' => CRM_Emailsystem_BAO_Emailsystem::getAdminEmails(),
+          'toEmail' => 'jane@amga.com',
           'tplParams' => array(),
         );
         CRM_Emailsystem_BAO_Emailsystem::sendMail($sendParams);
