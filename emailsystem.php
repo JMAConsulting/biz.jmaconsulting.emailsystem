@@ -207,7 +207,12 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     
     $values[$contactId]  += $value;
     CRM_Core_Smarty::singleton()->assign('eventStartDate', $results['start_date']);
-    CRM_Core_Smarty::singleton()->assign('enrollmentDate', $results['custom_' . ENROLLMENT_DATE_FIELD_ID]);    
+    CRM_Core_Smarty::singleton()->assign('enrollmentDate', $results['custom_' . ENROLLMENT_DATE_FIELD_ID]);
+  }
+
+  $membershipId = CRM_Core_Smarty::singleton()->get_template_vars('membershipIdToken');
+  if($membershipId){
+    $value['custom.membership_end_date'] = civicrm_api3('Membership', 'getvalue', array('id' => $membershipId, 'return' => 'end_date'));
   }
 }
 
@@ -227,6 +232,7 @@ function emailsystem_civicrm_tokens(&$tokens) {
     'custom.enrollment_date' => ts('Enrollment Date'),
     'custom.enrollment_deadline' => ts('Enrollment Deadline'),
     'custom.tuition' => ts('Full Tuition'),
+    'custom.membership_end_date' => ts('Membership End Date'),
   );
 }
 
