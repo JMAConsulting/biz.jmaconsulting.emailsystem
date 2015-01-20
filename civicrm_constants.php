@@ -11,5 +11,6 @@ define('UNDER_REVIEW_MSG_TPL_ADMIN', 80);
 define('EPP_LESS_MSG_TPL', 73);
 define('EPP_GREATER_MSG_TPL', 70);
 define('ENROLLMENT_DATE_FIELD_ID', 127);
+define('TUITION_FIELD_ID', 128);
 
 ?>

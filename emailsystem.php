@@ -191,7 +191,8 @@ function emailsystem_civicrm_tokenValues(&$values, $cids) {
     $value['custom.event_location'] = $results['event_location'];
     $value['custom.enrollment_date'] = CRM_Utils_Date::customFormat($results['custom_' . ENROLLMENT_DATE_FIELD_ID], '%B %E, %Y');
     $value['custom.enrollment_date_2_weeks'] = CRM_Utils_Date::customFormat(date('Y-m-d',strtotime("+2 weeks", strtotime($results['custom_' . ENROLLMENT_DATE_FIELD_ID]))), '%B %E, %Y');
-    
+    $value['custom.tuition'] = civicrm_api3('Event', 'getvalue', array('id' => $results['event_id'], 'return' => 'custom_' . TUITION_FIELD_ID));
+
     $date = date('F', $results['start_date']);
     if (in_array($date, array('December', 'January', 'February'))) {
       $dateRange = 'October 15';
@@ -225,6 +226,7 @@ function emailsystem_civicrm_tokens(&$tokens) {
     'custom.enrollment_date_2_weeks' => ts('2 weeks From Enrollment Date'),
     'custom.enrollment_date' => ts('Enrollment Date'),
     'custom.enrollment_deadline' => ts('Enrollment Deadline'),
+    'custom.tuition' => ts('Full Tuition'),
   );
 }
 
