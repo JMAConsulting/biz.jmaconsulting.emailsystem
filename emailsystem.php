@@ -120,7 +120,7 @@
     if ( array_key_exists( $scheduleReminder->name, CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames() ) ) {
       $queryParams['dateClause'] = str_replace( 'participant_register_date', 'e.register_date', $queryParams['dateClause'], $count );
       if ( $count ) {
-        $queryParams['dateClause'] .= CRM_Emailsystem_BAO_Emailsystem::getAdditionalWhereClause( $scheduleReminder->name );
+        $queryParams['whereClause'] = CRM_Emailsystem_BAO_Emailsystem::getAdditionalWhereClause( $scheduleReminder->name );
       }
     }
   }

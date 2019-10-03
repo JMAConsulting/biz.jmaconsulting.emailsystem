@@ -255,13 +255,13 @@
         case 'custom_schedule_reminder_6':
         case 'custom_schedule_reminder_15':
           // greater than 10 week
-          $additionalWhereClause = ' AND r.start_date > ' . strtotime( '+10 weeks' );
+          $additionalWhereClause = 'r.start_date > ' . strtotime( '+10 weeks' );
           break;
 
         case 'custom_schedule_reminder_7':
         case 'custom_schedule_reminder_8':
           // less than 10 week
-          $additionalWhereClause = ' AND r.start_date < ' . strtotime( '+10 weeks' );
+          $additionalWhereClause = 'r.start_date < ' . strtotime( '+10 weeks' );
           break;
       }
 
