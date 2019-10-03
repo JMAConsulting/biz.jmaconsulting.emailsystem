@@ -132,11 +132,6 @@
   function emailsystem_civicrm_buildForm( $formName, &$form ) {
     if ( 'CRM_Admin_Form_ScheduleReminders' == $formName && $form->getVar( '_id' ) ) {
       $values = $form->getVar( '_values' );
-      $temp = CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames();
-      error_log( 'Logging Statuses: ' . print_r( array(
-          $values,
-          $temp,
-        ), true ) );
       if ( !array_key_exists( $values['name'], CRM_Emailsystem_BAO_Emailsystem::getScheduleReminderNames() ) ) {
         return NULL;
       }
@@ -313,13 +308,12 @@
 
     if ( $objectName == 'Participant' && $op == 'edit' ) {
       if ( in_array( $objectRef->status_id, array(
-        PARTICIPANT_STATUS_UNDER_REVIEW,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3,
-        PARTICIPANT_STATUS_PASS,
-        ON_WAITLIST_STATUS_ID,
-      ) ) ) {
+          PARTICIPANT_STATUS_UNDER_REVIEW,
+          PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
+          PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
+          PARTICIPANT_STATUS_PASS,
+          ON_WAITLIST_STATUS_ID,
+        ) ) ) {
         if ( !CRM_Core_Smarty::singleton()->get_template_vars( 'statusChange' ) ) {
           return false;
         }
@@ -366,7 +360,6 @@
         if ( in_array( $objectRef->status_id, array(
           PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
           PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
-          PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3,
         ) ) ) {
           $eventId = $objectRef->event_id;
           if ( !$eventId ) {
@@ -375,33 +368,13 @@
           $eventStartDate = CRM_Core_DAO::getFieldValue( 'CRM_Event_DAO_Event', $eventId, 'start_date' );
           $eventStartDate = strtotime( $eventStartDate );
           $tenWeeks = strtotime( '+10 weeks' );
-
-          // REX - skip if PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3
-          if ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3 ) {
-            $messageTemplateId = TEST_TEMPLATE;
-          } elseif ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT && $tenWeeks < $eventStartDate ) {
+          if ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT && $tenWeeks < $eventStartDate ) {
             $messageTemplateId = EPP_GREATER_MSG_TPL;
           } elseif ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2 || $tenWeeks > $eventStartDate ) {
             $messageTemplateId = EPP_LESS_MSG_TPL;
-          } elseif ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3 || $tenWeeks > $eventStartDate ) {
-            $messageTemplateId = EPP_LESS_MSG_TPL;
-
           } else {
             return false;
           }
-
-
-          // REX - Original
-          //          if ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT && $tenWeeks < $eventStartDate ) {
-          //            $messageTemplateId = EPP_GREATER_MSG_TPL;
-          //          } elseif ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2 || $tenWeeks > $eventStartDate ) {
-          //            $messageTemplateId = EPP_LESS_MSG_TPL;
-          //          } elseif ( $objectRef->status_id == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3 || $tenWeeks > $eventStartDate ) {
-          //            $messageTemplateId = EPP_LESS_MSG_TPL;
-          //
-          //          } else {
-          //            return false;
-          //          }
         } elseif ( $objectRef->status_id == ON_WAITLIST_STATUS_ID ) {
           $messageTemplateId = ENROLLED_ON_WAITLIST_MSG_TPL;
         } else {
@@ -439,30 +412,23 @@
    */
   function emailsystem_civicrm_pre( $op, $objectName, $id, &$params ) {
     if ( $objectName == 'Participant' && $op == 'edit' && in_array( CRM_Utils_Array::value( 'status_id', $params ), array(
-        PARTICIPANT_STATUS_UNDER_REVIEW,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3,
-        PARTICIPANT_STATUS_PASS,
-        ON_WAITLIST_STATUS_ID,
-      ) )
+          PARTICIPANT_STATUS_UNDER_REVIEW,
+          PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
+          PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
+          PARTICIPANT_STATUS_PASS,
+          ON_WAITLIST_STATUS_ID,
+        ) )
     ) {
       $originalStatusId = CRM_Core_DAO::getFieldValue( 'CRM_Event_DAO_Participant', $id, 'status_id' );
       $enrolled_statuses = array(
         PARTICIPANT_STATUS_ENROLLED,
         PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT,
         PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT2,
-        PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3,
       );
       if ( $originalStatusId != $params['status_id'] && !( // Ensure status change isn't between the two enrolled statuses, no need for redundant emails
           in_array( $params['status_id'], $enrolled_statuses ) && in_array( $originalStatusId, $enrolled_statuses ) )
       ) {
         CRM_Core_Smarty::singleton()->assign( 'statusChange', true );
       }
-
-	// this is probably not needed, but we'll catch it anyway
-	if ( ($params['status_id'] == PARTICIPANT_STATUS_ENROLLED_PENDING_PAYMENT3 && $originalStatusId == PARTICIPANT_STATUS_UNDER_REVIEW)) {
-		CRM_Core_Smarty::singleton()->assign( 'statusChange', true );
-	}
     }
   }
